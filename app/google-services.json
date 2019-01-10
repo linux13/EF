@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "677994270298",
+    "firebase_url": "https://eventfusionproject.firebaseio.com",
+    "project_id": "eventfusionproject",
+    "storage_bucket": "eventfusionproject.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:677994270298:android:b11801b29ff0e37d",
+        "android_client_info": {
+          "package_name": "com.salasamuslimah.ef"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "677994270298-rs1fmvbh6rvvod6i3ul2g19jatiok4f7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.salasamuslimah.ef",
+            "certificate_hash": "64f42ad41d6c14cd66159ca126487d397e54dc45"
+          }
+        },
+        {
+          "client_id": "677994270298-hhvnsjaj2t6fh4vs9n6clbbj90tdc79t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4_9vbEyxOpPTTKdxCg4eOW8qP9SPKUNw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "677994270298-hhvnsjaj2t6fh4vs9n6clbbj90tdc79t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
