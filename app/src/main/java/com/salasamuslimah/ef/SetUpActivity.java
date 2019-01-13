@@ -98,11 +98,16 @@ public class SetUpActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-               if (dataSnapshot.exists())
-               {
-                   String image = dataSnapshot.child("profileimage").getValue().toString();
+               if (dataSnapshot.exists()) {
+                   if (dataSnapshot.hasChild("profileimage")) {
+                       String image = dataSnapshot.child("profileimage").getValue().toString();
 
-                   Picasso.with(SetUpActivity.this).load(image).placeholder(R.drawable.pro).into(ProfileImage);
+                       Picasso.get().load(image).placeholder(R.drawable.pro).into(ProfileImage);
+                   }
+               }
+               else
+               {
+                   Toast.makeText(SetUpActivity.this, "Please select profile image..", Toast.LENGTH_SHORT).show();
                }
 
             }
@@ -137,6 +142,13 @@ public class SetUpActivity extends AppCompatActivity {
 
             if (resultCode == RESULT_OK)
             {
+                LoadingBar.setTitle("Profile Image");
+                LoadingBar.setMessage("Please wait,while we are updating your profile image..");
+                LoadingBar.show();
+                LoadingBar.setCanceledOnTouchOutside(true);
+
+
+
                 Uri resultUri = result.getUri();
                 //ProfileImage.setImageURI(resultUri);
 
