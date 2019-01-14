@@ -2,7 +2,9 @@ package com.salasamuslimah.ef;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,6 +32,7 @@ import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -43,14 +46,19 @@ public class SetUpActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private DatabaseReference myRef;
-    private StorageReference UserProfileImageRef;
+    //private StorageReference UserProfileImageRef;
+    private FirebaseStorage firebaseStorage;
 
     private ProgressDialog LoadingBar;
 
     String currentUserID;
+    String username,fullname,country;
     private UploadTask uploadTask;
+    private StorageReference storageReference;
 
-    final static int Gallery_Pick = 1;
+    Uri imagePath;
+
+    final static int Gallery_Pick = 123;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +69,14 @@ public class SetUpActivity extends AppCompatActivity {
         currentUserID = mAuth.getCurrentUser().getUid();
         myRef = FirebaseDatabase.getInstance().getReference().child("Users").child(currentUserID);
 
-        UserProfileImageRef = FirebaseStorage.getInstance().getReference().child("profile Images");
+        storageReference = FirebaseStorage.getInstance().getReference();
+       // StorageReference myRef1 = storageReference.child(mAuth.getUid()).getRoot();
+
+
+
+
+
+        //UserProfileImageRef = FirebaseStorage.getInstance().getReference().child("profile Images");
         LoadingBar = new ProgressDialog(this);
 
         Username = (EditText) findViewById(R.id.setup_username);
@@ -77,10 +92,18 @@ public class SetUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                SaveAccountSetUpInformation();
+                if (validate())
+                {
+                   sendUserfullData();
+                    Toast.makeText(SetUpActivity.this, "Your account created successfully!", Toast.LENGTH_SHORT).show();
+                    finish();
+                    startActivity(new Intent(SetUpActivity.this, NavActivity.class));
+                }
+
 
             }
         });
+
 
         ProfileImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,12 +112,15 @@ public class SetUpActivity extends AppCompatActivity {
                 Intent galleryIntent = new Intent();
                 galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
                 galleryIntent.setType("image/*");
-                startActivityForResult(galleryIntent, Gallery_Pick);
+                startActivityForResult(galleryIntent.createChooser(galleryIntent, "Select Image"), Gallery_Pick);
 
             }
         });
 
-        myRef.addValueEventListener(new ValueEventListener() {
+
+
+
+      /*  myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
@@ -117,14 +143,54 @@ public class SetUpActivity extends AppCompatActivity {
             {
 
             }
-        });
+        });*/
 
 
     }
+    private Boolean validate(){
+        Boolean result = false;
 
 
+        username = Username.getText().toString();
+        fullname = FullName.getText().toString();
+        country = CountryName.getText().toString();
+
+        if (TextUtils.isEmpty(username)) {
+            Toast.makeText(this, "Please write your username", Toast.LENGTH_SHORT).show();
+        }
+        if (TextUtils.isEmpty(fullname)) {
+            Toast.makeText(this, "Please write your fullname", Toast.LENGTH_SHORT).show();
+        }
+        if (TextUtils.isEmpty(country)) {
+            Toast.makeText(this, "Please write your country", Toast.LENGTH_SHORT).show();
+        } else {
+
+            result = true;
+        }
+        return result;
+    }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == Gallery_Pick && resultCode == RESULT_OK && data.getData() != null) {
+            imagePath = data.getData();
+            CropImage.activity(imagePath)
+                    .setGuidelines(CropImageView.Guidelines.ON)
+                    .setAspectRatio(144,81)
+                    .start(this);
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imagePath);
+                ProfileImage.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+            super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+    /*  @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == Gallery_Pick && resultCode == RESULT_OK){
@@ -136,7 +202,7 @@ public class SetUpActivity extends AppCompatActivity {
         }
 
 
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+       if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
 
 
@@ -193,125 +259,21 @@ public class SetUpActivity extends AppCompatActivity {
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception error = result.getError();
             }
-        }
-    }
+        }*/
 
 
 
+   // private void SaveAccountSetUpInformation()
 
 
-   /* @Override
-   protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode==Gallery_Pick && requestCode==RESULT_OK)
-        {
-            Uri imageUri = data.getData();
 
-            CropImage.activity(imageUri)
-                    .setGuidelines(CropImageView.Guidelines.ON)
-                    .setAspectRatio(144,01)
-                    .start(this);
-        }
-        if(requestCode==CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE)
-        {
-            CropImage.ActivityResult result = CropImage.getActivityResult(data);
-
-            if (resultCode == RESULT_OK) {
-                LoadingBar.setTitle("Profile Image");
-                LoadingBar.setMessage("Please wait,while we are updating your profile image..");
-                LoadingBar.show();
-                LoadingBar.setCanceledOnTouchOutside(true);
-
-
-                Uri resultUri = result.getUri();
-                ProfileImage.setImageURI(resultUri);
-
-                StorageReference filePath = UserProfileImageRef.child(currentUserID + ".jpg");
-
-                filePath.putFile(resultUri)
-                        .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(SetUpActivity.this, "Profile Image Sored Successfully to firebase storage..", Toast.LENGTH_SHORT).show();
-
-                                    Task<Uri> result = task.getResult().getMetadata().getReference().getDownloadUrl();
-
-
-                                    result.addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                        @Override
-                                        public void onSuccess(Uri uri) {
-
-                                            final String downloadUrl = uri.toString();
-
-                                            myRef.child("profileimage").setValue(downloadUrl)
-                                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                            if (task.isSuccessful()) {
-                                                                Intent selfIntent = new Intent(SetUpActivity.this, SetUpActivity.class);
-                                                                startActivity(selfIntent);
-
-                                                                Toast.makeText(SetUpActivity.this, "Profile image stored to firebase database successfully", Toast.LENGTH_SHORT).show();
-                                                                LoadingBar.dismiss();
-
-                                                            } else {
-                                                                String message = task.getException().getMessage();
-                                                                Toast.makeText(SetUpActivity.this, "Error Occured" + message, Toast.LENGTH_SHORT).show();
-                                                                LoadingBar.dismiss();
-                                                            }
-                                                        }
-                                                    });
-
-                                        }
-                                    });
-
-                                }
-
-                            }
-
-                        });
-                }
-
-              else
-            {
-
-                Toast.makeText(SetUpActivity.this, "Error Occured", Toast.LENGTH_SHORT).show();
-                LoadingBar.dismiss();
-            }
-        }
-    }*/
-
-    private void SaveAccountSetUpInformation()
-    {
-
-        String username = Username.getText().toString();
-        String fullname = FullName.getText().toString();
-        String country = CountryName.getText().toString();
-
-        if (TextUtils.isEmpty(username))
-        {
-            Toast.makeText(this, "Please write your username", Toast.LENGTH_SHORT).show();
-        }
-        if (TextUtils.isEmpty(fullname))
-        {
-            Toast.makeText(this, "Please write your fullname", Toast.LENGTH_SHORT).show();
-        }
-        if (TextUtils.isEmpty(country))
-        {
-            Toast.makeText(this, "Please write your country", Toast.LENGTH_SHORT).show();
-        }
-        else
-        {
-            LoadingBar.setTitle("Saving Information");
+           /* LoadingBar.setTitle("Saving Information");
             LoadingBar.setMessage("Please wait,while we are creating your new account..");
             LoadingBar.show();
             LoadingBar.setCanceledOnTouchOutside(true);
 
 
-            HashMap userMap = new HashMap();
+         /*   HashMap userMap = new HashMap();
             userMap.put("username",username);
             userMap.put("fullname",fullname);
             userMap.put("country",country);
@@ -337,10 +299,10 @@ public class SetUpActivity extends AppCompatActivity {
                      LoadingBar.dismiss();
                  }
                 }
-            });
-        }
+            });*/
 
-    }
+
+
 
     private void SendUserToNavActivity()
     {
@@ -349,4 +311,30 @@ public class SetUpActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+
+    private  void sendUserfullData()
+    {
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        DatabaseReference myRef =firebaseDatabase.getReference(mAuth.getUid());
+        StorageReference imageReference = storageReference.child(mAuth.getUid()).child("Images").child("Profile Pic");
+        UploadTask uploadTask = imageReference.putFile(imagePath);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+                Toast.makeText(SetUpActivity.this, "failed!", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Toast.makeText(SetUpActivity.this, "successful!", Toast.LENGTH_SHORT).show();
+            }
+        });
+        UserNameAndProfile userNameAndProfile = new UserNameAndProfile(username,fullname,country);
+        myRef.setValue(userNameAndProfile);
+
+
+    }
 }
+
+

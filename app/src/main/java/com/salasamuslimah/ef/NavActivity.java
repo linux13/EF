@@ -1,6 +1,7 @@
 package com.salasamuslimah.ef;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -15,6 +16,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -22,6 +24,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -42,6 +46,7 @@ public class NavActivity extends AppCompatActivity {
     private DatabaseReference myRef;
 
     String currentUserID;
+    private FirebaseStorage firebaseStorage;
 
 
     @Override
@@ -51,9 +56,20 @@ public class NavActivity extends AppCompatActivity {
 
 
         mAuth = FirebaseAuth.getInstance();
+        firebaseStorage = FirebaseStorage.getInstance();
         currentUserID = mAuth.getCurrentUser().getUid();
 
         myRef = FirebaseDatabase.getInstance().getReference();
+
+        StorageReference storageReference = firebaseStorage.getReference();
+        storageReference.child(mAuth.getUid()).child("Images/Profile Pic").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Picasso.get().load(uri).fit().centerCrop().into(NavProfileImage);
+
+            }
+        });
+
 
         mToolbar = (Toolbar) findViewById(R.id.main_page_layout);
 
@@ -141,6 +157,17 @@ public class NavActivity extends AppCompatActivity {
         startActivity(addNewPOstIntent);
     }
 
+    private void SendUserToCreateEvent()
+    {
+        Intent createIntent = new Intent(NavActivity.this, CreateEvent.class);
+        startActivity(createIntent);
+    }
+    private void SendUserToMyProfileActivity()
+    {
+        Intent profileIntent = new Intent(NavActivity.this, MyProfileActivity.class);
+        startActivity(profileIntent);
+    }
+
     @Override
     protected void onStart()
     {
@@ -212,7 +239,7 @@ public class NavActivity extends AppCompatActivity {
                 break;
 
             case R.id.nav_profile:
-                Toast.makeText(this, "profile", Toast.LENGTH_SHORT).show();
+                SendUserToMyProfileActivity();
                 break;
 
             case R.id.nav_shared:
@@ -220,7 +247,7 @@ public class NavActivity extends AppCompatActivity {
                 break;
 
             case R.id.nav_create:
-                Toast.makeText(this, "create", Toast.LENGTH_SHORT).show();
+               SendUserToCreateEvent();
                 break;
 
             case R.id.nav_edit:
