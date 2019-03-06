@@ -8,6 +8,18 @@
     tools:context=".LoginActivity"
     android:background="@drawable/wallpaper3">
 
+    <Button
+        android:id="@+id/efusers2"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="150dp"
+        android:background="@drawable/buttonshape"
+        android:text="Ef Users"
+        android:textAllCaps="false"
+        android:textColor="#f4eeee" />
     <ImageView
         android:id="@+id/login_icon"
         android:layout_width="150dp"

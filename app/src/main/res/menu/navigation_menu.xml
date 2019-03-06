@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/nav_events"
-        android:title="My events"
-        android:icon="@drawable/myevent"/>
+    <item android:id="@+id/my_profile"
+        android:title="My Profile"
+        android:icon="@drawable/ic_person_black_24dp"/>
+
+    <item android:id="@+id/Ef_users"
+        android:title="Ef Users"
+        android:icon="@drawable/ic_supervisor_account_black_24dp"/>
 
 
-    <item android:id="@+id/nav_profile"
-        android:title="Profile"
-        android:icon="@drawable/ic_account_circle_black_24dp"/>
+
 
     <item android:id="@+id/nav_shared"
         android:title="Events shared with me"
@@ -18,9 +20,6 @@
         android:title="Create Event"
         android:icon="@drawable/plus"/>
 
-    <item android:id="@+id/nav_edit"
-        android:title="Edit Event"
-        android:icon="@drawable/edit"/>
 
     <item android:id="@+id/nav_inbox"
         android:title="Inbox"

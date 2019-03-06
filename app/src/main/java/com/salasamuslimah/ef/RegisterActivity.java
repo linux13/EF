@@ -1,7 +1,12 @@
 package com.salasamuslimah.ef;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,14 +21,24 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private EditText UserEmail , UserPassword, UserConfirmPassword;
     private Button CreateAccount;
     private FirebaseAuth mAuth;
+    private boolean connected=false;
 
     private ProgressDialog LoadingBar;
+
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +48,7 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
 
+        LoadingBar = new ProgressDialog(this);
 
         UserEmail = (EditText) findViewById(R.id.register_email);
         UserPassword = (EditText) findViewById(R.id.register_password);
@@ -44,8 +60,10 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-
+            boolean bl=chkInternetconnection();//network connection chk kora or
+            if(bl==true)   //bl true maney net... connection asey
               CreateNewAccount();
+            else Toast.makeText(RegisterActivity.this, "Turn on your wifi or mobile phone network then try again", Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -121,6 +139,9 @@ public class RegisterActivity extends AppCompatActivity {
                     });
         }
     }
+
+
+
     private void SendUserToSetUpActivity()
     {
         Intent setupIntent = new Intent(RegisterActivity.this,SetUpActivity.class);
@@ -128,5 +149,18 @@ public class RegisterActivity extends AppCompatActivity {
         startActivity(setupIntent);
         finish();
 
+    }
+
+    private boolean chkInternetconnection(){
+        ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
+                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
+            //we are connected to a network
+            connected = true;
+        }
+        else
+            connected = false;
+
+        return connected;
     }
 }
