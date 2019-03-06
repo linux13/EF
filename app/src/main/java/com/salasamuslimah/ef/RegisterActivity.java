@@ -33,7 +33,7 @@ public class RegisterActivity extends AppCompatActivity {
     private Button CreateAccount;
     private FirebaseAuth mAuth;
     private boolean connected=false;
-
+    //adsfa
     private ProgressDialog LoadingBar;
 
 
